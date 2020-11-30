@@ -2,7 +2,7 @@ module Simplices
 
 using LinearAlgebra
 
-include("Vertexes.jl")
+include("Vertices.jl")
 
 function convergenceconfig(dim::Int, T::Type; kwargs...)
   kwargs = Dict(kwargs)
