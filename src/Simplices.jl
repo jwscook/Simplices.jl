@@ -198,7 +198,7 @@ function _πtoπ(ϕ)
   return ϕ
 end
 
-windingnumber(s::Simplex{T, <:Real}) where {T} = 0.0
+windingangle(s::Simplex{T, <:Real}) where {T} = zero(T)
 function windingangle(s::Simplex{T, <:Complex}) where {T}
   return sum(_πtoπ.(angle.(value.(circshift(s.vertices, -1))) .-
                     angle.(value.(s.vertices))))
