@@ -17,7 +17,6 @@ function convergenceconfig(dim::Int, T::Type; kwargs...)
           stopval=stopval)
 end
 
-
 struct Simplex{T<:Number, U<:Number}
   vertices::Vector{Vertex{T,U}}
   permabs::Vector{Int}
@@ -42,25 +41,24 @@ function Simplex(f::T, positions::U
   return Simplex(vertices)
 end
 
-function partitionunitypositions(dims::Int)
-  output = Vector{Vector{Vector{Bool}}}()
-  for i ∈ CartesianIndices(Tuple(ones(Int64, dims) .* dims))
+function partitionunitypositions(dims::Int, t::Type{T}=Bool) where {T}
+  output = Vector{Vector{Vector{T}}}()
+  @inbounds for i ∈ CartesianIndices(Tuple(ones(Int64, dims) .* dims))
     v = Tuple(i)
     any(j->any(v[j] .== v[1:j-1]), 1:dims) && continue
-    inner = Vector{Vector{Bool}}()
-    push!(inner, zeros(Bool, dims))
+    inner = Vector{Vector{T}}()
+    push!(inner, zeros(T, dims))
     for j ∈ 2:dims
-      x = zeros(Float64, dims)
+      x = zeros(T, dims)
       for k ∈ 1:(j-1)
-        x[v[k]] = true
+        x[v[k]] = one(T)
       end
       push!(inner, x)
     end
-    push!(inner, ones(Bool, dims))
+    push!(inner, ones(T, dims))
     @assert length(inner) == dims + 1
     push!(output, inner)
   end
-
   @assert length(output) == factorial(dims)
   return output
 end

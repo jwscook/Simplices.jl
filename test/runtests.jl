@@ -155,8 +155,8 @@ using Simplices: bestvertex, issortedbyangle, hypervolume
 
   @testset "Partition of hypercubes" begin
     for dims in 1:6
-      positions = Simplices.partitionunitypositions(dims)
-      ss = [Simplex(x->one(ComplexF64), [Float64.(p) for p in ps]) for ps in positions]
+      positions = Simplices.partitionunitypositions(dims, Float64)
+      ss = [Simplex(x->one(ComplexF64), [p for p in ps]) for ps in positions]
       for i ∈ 1:10
         x = rand(dims)
         xins = [x ∈ s for s in ss]
