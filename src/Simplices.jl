@@ -41,6 +41,15 @@ function Simplex(f::T, positions::U
   return Simplex(vertices)
 end
 
+function partitionhypercube(f::T, a, b) where {T}
+  dims = length(a)
+  @assert dims == length(b)
+  @assert all(a .< b)
+  l = b .- a
+  positions = partitionunitypositions(dims, Bool)
+  return (Simplex(f, [p .* l .+ a for p in ps]) for ps in positions)
+end
+
 function partitionunitypositions(dims::Int, t::Type{T}=Bool) where {T}
   output = Vector{Vector{Vector{T}}}()
   @inbounds for i ∈ CartesianIndices(Tuple(ones(Int64, dims) .* dims))
@@ -62,11 +71,17 @@ function partitionunitypositions(dims::Int, t::Type{T}=Bool) where {T}
   @assert length(output) == factorial(dims)
   return output
 end
-
+function sharesvertex(v::Vertex, s::Simplex)
+  for w in s
+    all(v.position .== w.position) && return true
+  end
+  return false
+end
 function Base.:∈(x, s::Simplex)
   return ∈(Vertex(x, one(value(first(s)))), s)
 end
 function Base.:∈(v::Vertex, s::Simplex)
+  sharesvertex(v, s) && return true
   h = hash(s)
   function inner(i)
     swap!(s, i, v)
@@ -79,6 +94,14 @@ function Base.:∈(v::Vertex, s::Simplex)
   return isapprox(volume, hypervolume(s), rtol=sqrt(eps()), atol=0)
 end
 
+function Base.:∈(a::Simplex, b::Simplex)
+  isequal(a, b) && return true
+  for v in a
+    sharesvertex(v, b) && continue # doesn't count, could just be neighbours
+    v ∈ b && return true
+  end
+  return false
+end
 import Base: length, iterate, push!, iterate, getindex
 import Base: eachindex, sort!, hash, extrema
 Base.length(s::Simplex) = length(s.vertices)

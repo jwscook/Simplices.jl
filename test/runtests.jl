@@ -154,13 +154,39 @@ using Simplices: bestvertex, issortedbyangle, hypervolume
   end
 
   @testset "Partition of hypercubes" begin
-    for dims in 1:6
-      positions = Simplices.partitionunitypositions(dims, Float64)
-      ss = [Simplex(x->one(ComplexF64), [p for p in ps]) for ps in positions]
-      for i ∈ 1:10
-        x = rand(dims)
-        xins = [x ∈ s for s in ss]
-        @test sum(xins) == 1 # can only exist in 1 simplex 
+    @testset "unity" begin
+      for dims in 1:6
+        positions = Simplices.partitionunitypositions(dims, Float64)
+        ss = [Simplex(x->one(ComplexF64), [p for p in ps]) for ps in positions]
+        for i ∈ 1:10
+          x = rand(dims)
+          xins = [x ∈ s for s in ss]
+          @test sum(xins) == 1 # can only exist in 1 simplex
+        end
+      end
+    end
+  @testset "random hypercube" begin
+      for dims in 1:6
+        a = rand(dims) .- 0.5
+        b = a .+ rand(dims)
+        ss = Simplices.partitionhypercube(x->1, a, b)
+        for i ∈ 1:10
+          x = a .+ rand(dims) .* (b .- a)
+          xins = [x ∈ s for s in ss]
+          @test sum(xins) == 1 # can only exist in 1 simplex
+        end
+      end
+    end
+   @testset "partition simplices don't overlap" begin
+      for dims in 1:4 # anything higher is too expensive
+        ss = Simplices.partitionhypercube(x->1, zeros(dims), ones(dims))
+        for a in ss, b in ss
+          if isequal(a, b)
+            @test a ∈ b
+          else
+            @test !(a ∈ b)
+          end
+        end
       end
     end
   end

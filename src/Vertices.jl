@@ -1,4 +1,4 @@
-struct Vertex{T, U<:Complex}
+struct Vertex{T, U<:Number}
   position::AbstractVector{T}
   value::U
 end
